@@ -28,14 +28,14 @@ from flask import flask, jsonify -> para produzir arquivos em formato json
 import datetime
 import hashlib
 import json
-from flask import flask, jsonify
+from flask import Flask, jsonify
 
 #parte 1, criar um blockchain
 
 class Blockchain:
     def __init__(self):
         self.chain = [] #inicializando uma lista
-        self.create_block(proof = 1, previuos_hash = '0')
+        self.create_block(proof =1, previous_hash ='0')
         
     def create_block(self, proof, previous_hash):
         #criando um dicionario
@@ -51,7 +51,7 @@ class Blockchain:
     #criar um metodo para retornar o block anterior
     
     def get_previous_block(self):
-        return self.chain[self.chain - 1]
+        return self.chain[-1]
     
     def proof_of_work(self, previous_proof):
         new_proof = 1
@@ -92,17 +92,41 @@ class Blockchain:
 
 
 
+#instanciar a class blockchain e inicializar a aplicação web com flask
+app = Flask(__name__)
+
+blockchain = Blockchain()
+
+@app.route('/mine_block', methods = ['GET']) # pagina para mineração do blockchain
+
+#criar a função de mineração
+
+def mine_block():
+    previous_block = blockchain.get_previous_block()
+    previous_proof = previous_block['proof']
+    proof = blockchain.proof_of_work(previous_proof)
+    previous_hash = blockchain.hash(previous_block)    
+    block = blockchain.create_block(proof, previous_hash)
+    response = {'message': 'Parabens você minerou um bloco!',
+                'index': block['index'],
+                'timestamp': block['timestamp'],
+                'proof': block['proof'],
+                'previous_hash': block['previous_hash']}
+    
+    return jsonify(response), 200
 
 
+@app.route('/get_chain', methods = ['GET']) #pargina para verificar todo o blockchain
+
+def get_chain():
+    response = {
+                'chain': blockchain.chain,
+                'length': len(blockchain.chain)
+                }
+    return jsonify(response), 200
 
 
-
-
-
-
-
-
-
+app.run(host = '0.0.0.0', port = 5000)
 
 
 
