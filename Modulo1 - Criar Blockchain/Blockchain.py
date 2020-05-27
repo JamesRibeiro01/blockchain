@@ -29,20 +29,36 @@ import datetime
 import hashlib
 import json
 from flask import Flask, jsonify
+from firebase import firebase
+
+firebase = firebase.FirebaseApplication('https://projetotcc-89335.firebaseio.com/', None)
+responseRequest = firebase.get('/contatos/', '')
+#print(result)
 
 #parte 1, criar um blockchain
+
 
 class Blockchain:
     def __init__(self):
         self.chain = [] #inicializando uma lista
         self.create_block(proof =1, previous_hash ='0')
         
+        
     def create_block(self, proof, previous_hash):
+        studentData = []
         #criando um dicionario
+        for studentID in responseRequest:
+            studentData = responseRequest[studentID]
+            
         block = {'index': len(self.chain) + 1,
-                 'timestamp': str(datetime.datetime.now()),
-                 'proof': proof,
-                 'previous_hash': previous_hash}
+                     'timestamp': str(datetime.datetime.now()),
+                     'proof': proof,
+                     'previous_hash': previous_hash,
+                     'Student_Name': studentData['nomeAluno'],
+                     'Course': studentData['curso'] ,
+                     'Email': studentData['email'],
+                     'Registration': studentData['matricula'],
+                     'Password': studentData['senha']}
         
         self.chain.append(block) #adicionar um elemento na Lista
         return block
@@ -92,6 +108,7 @@ class Blockchain:
 
 
 
+
 #instanciar a class blockchain e inicializar a aplicação web com flask
 app = Flask(__name__)
 
@@ -111,7 +128,13 @@ def mine_block():
                 'index': block['index'],
                 'timestamp': block['timestamp'],
                 'proof': block['proof'],
-                'previous_hash': block['previous_hash']}
+                'previous_hash': block['previous_hash'],
+                'Student_Name': block['Student_Name'],
+                'Course': block['Course'] ,
+                'Email': block['Email'],
+                'Registration': block['Registration'],
+                'Password': block['Password']
+                }
     
     return jsonify(response), 200
 
