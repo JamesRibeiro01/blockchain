@@ -33,7 +33,9 @@ from firebase import firebase
 
 firebase = firebase.FirebaseApplication('https://projetotcc-89335.firebaseio.com/', None)
 responseRequest = firebase.get('/contatos/', '')
-#print(result)
+print(responseRequest)
+
+
 
 #parte 1, criar um blockchain
 
@@ -47,18 +49,12 @@ class Blockchain:
     def create_block(self, proof, previous_hash):
         studentData = []
         #criando um dicionario
-        for studentID in responseRequest:
-            studentData = responseRequest[studentID]
-            
+     
         block = {'index': len(self.chain) + 1,
                      'timestamp': str(datetime.datetime.now()),
                      'proof': proof,
                      'previous_hash': previous_hash,
-                     'Student_Name': studentData['nomeAluno'],
-                     'Course': studentData['curso'] ,
-                     'Email': studentData['email'],
-                     'Registration': studentData['matricula'],
-                     'Password': studentData['senha']}
+                 }
         
         self.chain.append(block) #adicionar um elemento na Lista
         return block
@@ -114,9 +110,11 @@ app = Flask(__name__)
 
 blockchain = Blockchain()
 
-@app.route('/mine_block', methods = ['GET']) # pagina para mineração do blockchain
+@app.route('/mine_new_block', methods = ['GET']) # pagina para mineração do blockchain
 
 #criar a função de mineração
+        #for studentID in responseRequest:
+            #studentData = responseRequest[studentID]
 
 def mine_block():
     previous_block = blockchain.get_previous_block()
@@ -129,14 +127,13 @@ def mine_block():
                 'timestamp': block['timestamp'],
                 'proof': block['proof'],
                 'previous_hash': block['previous_hash'],
-                'Student_Name': block['Student_Name'],
-                'Course': block['Course'] ,
-                'Email': block['Email'],
-                'Registration': block['Registration'],
-                'Password': block['Password']
                 }
     
     return jsonify(response), 200
+
+def mine_new_block():
+    for userName in responseRequest:
+        mine_block()
 
 
 @app.route('/get_chain', methods = ['GET']) #pargina para verificar todo o blockchain
