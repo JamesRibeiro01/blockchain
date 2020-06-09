@@ -30,38 +30,45 @@ import hashlib
 import json
 from flask import Flask, jsonify
 from firebase import firebase
-
 firebase = firebase.FirebaseApplication('https://projetotcc-89335.firebaseio.com/', None)
-responseRequest = firebase.get('https://projetotcc-89335.firebaseio.com/', '')
+
 #parte 1, criar um blockchain
 
-
+    
 class Blockchain:
     def __init__(self):
         self.chain = [] #inicializando uma lista
+        self.firebaseValues = []
         self.create_block(proof =1, previous_hash ='0')
         
-    def firebaseDatas(responseRequest):
-        for userName in responseRequest:
-            responseBlock = {
-                        'teste': 1
-                        }
-        return responseBlock
-    
-            
-    def create_block(self, proof, previous_hash):
-
-     
-        block = {'index': len(self.chain) + 1,
-                     'timestamp': str(datetime.datetime.now()),
-                     'proof': proof,
-                     'previous_hash': previous_hash,
-    
-                 }
         
+      
+        
+    def create_block(self, proof, previous_hash):
+        responseRequest = firebase.get('https://projetotcc-89335.firebaseio.com/', '')
+        for requestId in responseRequest:         
+            firebaseData = responseRequest[requestId]
+            blockFirebase = {
+                    'Curso': firebaseData['curso'],
+                    'Email': firebaseData['email'],
+                    'Matricula': firebaseData['matricula'],
+                    'Nome': firebaseData['nome'],
+                    'index': len(self.chain) + 1,
+                    'timestamp': str(datetime.datetime.now()),
+                    'proof': proof,
+                    'previous_hash': previous_hash
+                }
+            self.firebaseValues.append(blockFirebase)   
+        
+        block = {'index': len(self.chain) + 1,
+                 'timestamp': str(datetime.datetime.now()),
+                 'proof': proof,
+                 'previous_hash': previous_hash
+                 }
+            
         self.chain.append(block) #adicionar um elemento na Lista
         return block
-    
+        
     
     #criar um metodo para retornar o block anterior
     
@@ -120,7 +127,7 @@ app = Flask(__name__)
 
 def mine_block():
      
-    blockchain = Blockchain() 
+    blockchain = Blockchain()
     previous_block = blockchain.get_previous_block()
     previous_proof = previous_block['proof']
     proof = blockchain.proof_of_work(previous_proof)
@@ -142,6 +149,7 @@ def mine_block():
 def get_chain():
     response = {
                 'chain': blockchain.chain,
+                'teste': blockchain.firebaseValues,
                 'length': len(blockchain.chain)
                 }
     return jsonify(response), 200
