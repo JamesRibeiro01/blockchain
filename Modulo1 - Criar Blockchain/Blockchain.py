@@ -49,11 +49,11 @@ class Blockchain:
         for requestId in responseRequest:         
             firebaseData = responseRequest[requestId]
             blockFirebase = {
+                    'BlockID': len(self.firebaseValues) + 1,
                     'Curso': firebaseData['curso'],
                     'Email': firebaseData['email'],
                     'Matricula': firebaseData['matricula'],
                     'Nome': firebaseData['nome'],
-                    'index': len(self.chain) + 1,
                     'timestamp': str(datetime.datetime.now()),
                     'proof': proof,
                     'previous_hash': previous_hash
@@ -73,7 +73,7 @@ class Blockchain:
     #criar um metodo para retornar o block anterior
     
     def get_previous_block(self):
-        return self.chain[-1]
+        return self.firebaseValues[-1]
     
     def proof_of_work(self, previous_proof):
         new_proof = 1
@@ -148,9 +148,8 @@ def mine_block():
 
 def get_chain():
     response = {
-                'chain': blockchain.chain,
-                'teste': blockchain.firebaseValues,
-                'length': len(blockchain.chain)
+                'chain': blockchain.firebaseValues,
+                'length': len(blockchain.firebaseValues)
                 }
     return jsonify(response), 200
 
