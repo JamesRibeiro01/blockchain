@@ -46,10 +46,11 @@ class Blockchain:
         
     def create_block(self, proof, previous_hash):
         responseRequest = firebase.get('https://projetotcc-89335.firebaseio.com/', '')
-        for requestId in responseRequest:         
+        count = 1
+        for requestId in responseRequest:
             firebaseData = responseRequest[requestId]
             blockFirebase = {
-                    'BlockID': len(self.firebaseValues) + 1,
+                    'BlockID': len(self.firebaseValues) + count,
                     'Curso': firebaseData['curso'],
                     'Email': firebaseData['email'],
                     'Matricula': firebaseData['matricula'],
@@ -58,16 +59,21 @@ class Blockchain:
                     'proof': proof,
                     'previous_hash': previous_hash
                 }
-            self.firebaseValues.append(blockFirebase)   
+            count = count + 1
+            self.firebaseValues.append(blockFirebase)
+            previous_block = self.get_previous_block()
+            previous_proof = previous_block['proof']
+            proof = self.proof_of_work(previous_proof)
+            previous_hash = self.hash(previous_block)
         
-        block = {'index': len(self.chain) + 1,
-                 'timestamp': str(datetime.datetime.now()),
-                 'proof': proof,
-                 'previous_hash': previous_hash
-                 }
+        #block = {'index': len(self.chain) + 1,
+                 #'timestamp': str(datetime.datetime.now()),
+                 #'proof': proof,
+                 #'previous_hash': previous_hash
+                 #}
             
-        self.chain.append(block) #adicionar um elemento na Lista
-        return block
+        #self.chain.append(block) #adicionar um elemento na Lista
+        #return block
         
     
     #criar um metodo para retornar o block anterior
@@ -117,31 +123,18 @@ class Blockchain:
 
 #instanciar a class blockchain e inicializar a aplicação web com flask
 
-
 blockchain = Blockchain()
 app = Flask(__name__)
 
     
-@app.route('/mine_block', methods = ['GET'])
+@app.route('/mine_block')
 
-
-def mine_block():
-     
-    blockchain = Blockchain()
+def mine_block():   
     previous_block = blockchain.get_previous_block()
     previous_proof = previous_block['proof']
     proof = blockchain.proof_of_work(previous_proof)
     previous_hash = blockchain.hash(previous_block)    
     block = blockchain.create_block(proof, previous_hash)
-    response = {'message': 'Parabens você minerou um bloco!',
-                'index': block['index'],
-                'timestamp': block['timestamp'],
-                'proof': block['proof'],
-                'previous_hash': block['previous_hash'],
-                }  
-    return jsonify(response), 200
-
-
 
 
 @app.route('/get_chain', methods = ['GET']) #pargina para verificar todo o blockchain
